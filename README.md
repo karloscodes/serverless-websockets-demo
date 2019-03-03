@@ -4,7 +4,7 @@ A simple chat using websockets, serverless and aws lambda
 ## Basic usage:
 - Install serverless framework 1.38 or superior
 - run ```sls deploy```
-- Use a websocket client such as (wscat)[https://www.npmjs.com/package/wscat] to connect and send messages
+- Use a websocket client such as [wscat](https://www.npmjs.com/package/wscat) to connect and send messages
 
 ## Examples:
   - First user setup:
