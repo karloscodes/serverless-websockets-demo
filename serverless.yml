@@ -1,0 +1,66 @@
+service: websockets
+
+frameworkVersion: ">=1.38.0"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "dynamodb:*"
+    Resource: "*"
+  - Effect: Allow
+    Action:
+      - "execute-api:ManageConnections"
+    Resource:
+      - "arn:aws:execute-api:*:*:**/@connections/*"
+
+functions:
+  wsConnectionHandler:
+    handler: handler.wsConnectionHandler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+  wsDefaultHandler:
+    handler: handler.wsDefaultHandler
+    events:
+      - websocket:
+          route: $default
+  wsSendMessageHandler:
+    handler: handler.wsSendMessageHandler
+    events:
+      - websocket:
+          route: sendMessage
+
+
+resources:
+  Resources:
+    UsersConnectionsTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: "userId"
+          AttributeType: "S"
+        - AttributeName: "connectionId"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "userId"
+          KeyType: "HASH"
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: websocket-users-connections
+        GlobalSecondaryIndexes:
+          - IndexName: websocket-users-connections-connectionId-GSI
+            KeySchema:
+              - AttributeName: connectionId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
